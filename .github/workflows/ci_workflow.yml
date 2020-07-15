@@ -65,8 +65,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             cxx-compiler: g++
@@ -78,8 +76,6 @@ jobs:
             build-type: Debug
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             cxx-compiler: g++
@@ -91,8 +87,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 14
             cxx-compiler: g++
@@ -104,8 +98,6 @@ jobs:
             build-type: Release
             build-shared: 'OFF'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'OFF'
             cxx-standard: 11
             cxx-compiler: g++
@@ -120,8 +112,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             cxx-compiler: g++
@@ -136,8 +126,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             cxx-compiler: clang++
@@ -149,8 +137,6 @@ jobs:
             build-type: Debug
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            build-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             cxx-compiler: clang++
@@ -162,8 +148,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 14
             cxx-compiler: clang++
@@ -175,8 +159,6 @@ jobs:
             build-type: Release
             build-shared: 'OFF'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'OFF'
             cxx-standard: 11
             cxx-compiler: clang++
@@ -191,8 +173,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             cxx-compiler: clang++
@@ -222,8 +202,7 @@ jobs:
                 -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} \
                 -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
                 -DOCIO_BUILD_DOCS=${{ matrix.build-docs }} \
-                -DOCIO_BUILD_GPU_TESTS=${{ matrix.build-gpu }} \
-                -DOCIO_USE_HEADLESS=${{ matrix.use-headless }} \
+                -DOCIO_BUILD_GPU_TESTS=OFF \
                 -DOCIO_USE_SSE=${{ matrix.use-sse }} \
                 -DOCIO_INSTALL_EXT_PACKAGES=ALL \
                 -DOCIO_WARNING_AS_ERROR=ON \
@@ -234,11 +213,31 @@ jobs:
           cmake --build . \
                 --target install \
                 --config ${{ matrix.build-type }} \
-                -- -j2
+                -- -j$(nproc)
         working-directory: _build
       - name: Test
         run: ctest -V
         working-directory: _build
+
+  # ---------------------------------------------------------------------------
+  # Linux GPU (AWS CodeBuild)
+  # ---------------------------------------------------------------------------
+
+  linux_gpu:
+    name: 'Linux CentOS 7 VFX CY2020 GPU <GCC 6.3.1>'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CODEBUILD_ID }}
+          aws-secret-access-key: ${{ secrets.CODEBUILD_SECRET }}
+          aws-region: us-west-2
+      - name: Run CodeBuild
+        uses: aws-actions/aws-codebuild-run-project@v1.0.0
+        with:
+          project-name: OpenColorIO
+          buildspec-override: buildspec.yml
 
   # ---------------------------------------------------------------------------
   # macOS
@@ -263,8 +262,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             python-version: 3.7
@@ -273,8 +270,6 @@ jobs:
             build-type: Debug
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             python-version: 3.7
@@ -283,8 +278,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 14
             python-version: 3.7
@@ -293,8 +286,6 @@ jobs:
             build-type: Release
             build-shared: 'OFF'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'OFF'
             cxx-standard: 11
             python-version: 3.7
@@ -303,8 +294,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             python-version: 2.7
@@ -327,8 +316,7 @@ jobs:
                 -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} \
                 -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
                 -DOCIO_BUILD_DOCS=${{ matrix.build-docs }} \
-                -DOCIO_BUILD_GPU_TESTS=${{ matrix.build-gpu }} \
-                -DOCIO_USE_HEADLESS=${{ matrix.use-headless }} \
+                -DOCIO_BUILD_GPU_TESTS=OFF \
                 -DOCIO_USE_SSE=${{ matrix.use-sse }} \
                 -DOCIO_INSTALL_EXT_PACKAGES=ALL \
                 -DOCIO_WARNING_AS_ERROR=ON \
@@ -339,7 +327,7 @@ jobs:
           cmake --build . \
                 --target install \
                 --config ${{ matrix.build-type }} \
-                -- -j2
+                -- -j$(sysctl -n hw.ncpu)
         working-directory: _build
       - name: Test
         run: ctest -V
@@ -370,8 +358,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             python-version: 3.7
@@ -380,8 +366,6 @@ jobs:
             build-type: Debug
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             python-version: 3.7
@@ -390,8 +374,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 14
             python-version: 3.7
@@ -400,8 +382,6 @@ jobs:
             build-type: Release
             build-shared: 'OFF'
             build-docs: 'OFF'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'OFF'
             cxx-standard: 11
             python-version: 3.7
@@ -410,8 +390,6 @@ jobs:
             build-type: Release
             build-shared: 'ON'
             build-docs: 'ON'
-            build-gpu: 'OFF'
-            use-headless: 'OFF'
             use-sse: 'ON'
             cxx-standard: 11
             python-version: 2.7
@@ -436,8 +414,7 @@ jobs:
                 -DCMAKE_GENERATOR_PLATFORM=x64 \
                 -DBUILD_SHARED_LIBS=${{ matrix.build-shared }} \
                 -DOCIO_BUILD_DOCS=${{ matrix.build-docs }} \
-                -DOCIO_BUILD_GPU_TESTS=${{ matrix.build-gpu }} \
-                -DOCIO_USE_HEADLESS=${{ matrix.use-headless }} \
+                -DOCIO_BUILD_GPU_TESTS=OFF \
                 -DOCIO_USE_SSE=${{ matrix.use-sse }} \
                 -DOCIO_INSTALL_EXT_PACKAGES=ALL \
                 -DOCIO_WARNING_AS_ERROR=ON \
