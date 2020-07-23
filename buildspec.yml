@@ -20,9 +20,11 @@ env:
   variables:
     CXX: g++
     CC: gcc
+    DISPLAY: ':0'
   exported-variables:
     - CXX
     - CC
+    - DISPLAY
 
 phases:
   pre_build:
